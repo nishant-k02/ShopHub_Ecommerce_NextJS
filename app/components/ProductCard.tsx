@@ -15,14 +15,20 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const router = useRouter();
 
-  const handleAddToCart = () => {
-    // In a real app, this would dispatch to a cart state management solution
-    // For now, we'll just navigate to the cart page
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when clicking the button
     router.push('/cart');
   };
 
+  const handleCardClick = () => {
+    router.push(`/products/${product.id}`);
+  };
+
   return (
-    <div className="card group">
+    <div 
+      className="card group cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="relative aspect-square overflow-hidden">
         <Image
           src={product.imageUrl}
@@ -31,7 +37,10 @@ export default function ProductCard({ product }: ProductCardProps) {
           className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
         <button
-          onClick={() => setIsFavorite(!isFavorite)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsFavorite(!isFavorite);
+          }}
           className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors"
         >
           {isFavorite ? (
