@@ -1,37 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
-import { Product, products } from '../product-data';
-
-// Mock cart data - in a real app, this would come from a state management solution
-const initialCartItems = [
-  { product: products[0], quantity: 1 },
-  { product: products[1], quantity: 2 },
-];
+import { useCart } from '../context/CartContext';
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  const router = useRouter();
+  const { 
+    cartItems, 
+    removeFromCart, 
+    updateQuantity, 
+    getSubtotal 
+  } = useCart();
 
-  const updateQuantity = (productId: string, change: number) => {
-    setCartItems(items =>
-      items.map(item =>
-        item.product.id === productId
-          ? { ...item, quantity: Math.max(0, item.quantity + change) }
-          : item
-      ).filter(item => item.quantity > 0)
-    );
+  const handleProceedToCheckout = () => {
+    router.push('/checkout');
   };
 
-  const removeItem = (productId: string) => {
-    setCartItems(items => items.filter(item => item.product.id !== productId));
-  };
-
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  );
+  const subtotal = getSubtotal();
   const shipping = 10;
   const total = subtotal + shipping;
 
@@ -49,9 +36,12 @@ export default function CartPage() {
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
             <p className="text-gray-500 mb-6">Looks like you haven't added any items to your cart yet.</p>
-            <a href="/products" className="btn btn-primary">
+            <button 
+              onClick={() => router.push('/products')} 
+              className="btn btn-primary"
+            >
               Continue Shopping
-            </a>
+            </button>
           </div>
         ) : (
           <div className="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:items-start">
@@ -80,7 +70,7 @@ export default function CartPage() {
                           </p>
                         </div>
                         <button
-                          onClick={() => removeItem(item.product.id)}
+                          onClick={() => removeFromCart(item.product.id)}
                           className="text-gray-400 hover:text-red-500"
                         >
                           <TrashIcon className="h-5 w-5" />
@@ -109,7 +99,7 @@ export default function CartPage() {
             </div>
 
             {/* Order Summary */}
-            <div className="mt-8 lg:mt-0 lg:col-span-5">
+            <div className="lg:col-span-5 mt-8 lg:mt-0">
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
                 <div className="space-y-4">
@@ -127,14 +117,20 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                <button className="btn btn-primary w-full mt-6">
+                <button 
+                  onClick={handleProceedToCheckout}
+                  className="btn btn-primary w-full mt-6"
+                >
                   Proceed to Checkout
                 </button>
 
                 <div className="mt-6 text-center">
-                  <a href="/products" className="text-sm text-accent hover:text-blue-600">
+                  <button
+                    onClick={() => router.push('/products')}
+                    className="text-sm text-accent hover:text-blue-600"
+                  >
                     Continue Shopping
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
