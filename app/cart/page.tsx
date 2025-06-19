@@ -11,7 +11,9 @@ export default function CartPage() {
     cartItems, 
     removeFromCart, 
     updateQuantity, 
-    getSubtotal 
+    getSubtotal,
+    loading,
+    error
   } = useCart();
 
   const handleProceedToCheckout = () => {
@@ -21,6 +23,33 @@ export default function CartPage() {
   const subtotal = getSubtotal();
   const shipping = 10;
   const total = subtotal + shipping;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading cart...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="btn btn-primary"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -49,11 +78,11 @@ export default function CartPage() {
             <div className="lg:col-span-7">
               <div className="bg-white rounded-lg shadow-sm divide-y divide-gray-200">
                 {cartItems.map((item) => (
-                  <div key={item.product.id} className="p-6 flex">
+                  <div key={item.id} className="p-6 flex">
                     <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
                       <Image
-                        src={item.product.imageUrl}
-                        alt={item.product.name}
+                        src={item.imageUrl}
+                        alt={item.name}
                         fill
                         className="object-cover"
                       />
@@ -63,14 +92,14 @@ export default function CartPage() {
                       <div className="flex justify-between">
                         <div>
                           <h3 className="text-lg font-medium text-gray-900">
-                            {item.product.name}
+                            {item.name}
                           </h3>
                           <p className="mt-1 text-sm text-gray-500">
-                            ${item.product.price.toFixed(2)}
+                            ${item.price.toFixed(2)}
                           </p>
                         </div>
                         <button
-                          onClick={() => removeFromCart(item.product.id)}
+                          onClick={() => removeFromCart(item.productId)}
                           className="text-gray-400 hover:text-red-500"
                         >
                           <TrashIcon className="h-5 w-5" />
@@ -79,14 +108,14 @@ export default function CartPage() {
 
                       <div className="mt-4 flex items-center">
                         <button
-                          onClick={() => updateQuantity(item.product.id, -1)}
+                          onClick={() => updateQuantity(item.productId, -1)}
                           className="p-1 rounded-full hover:bg-gray-100"
                         >
                           <MinusIcon className="h-4 w-4" />
                         </button>
                         <span className="mx-4 text-gray-900">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.product.id, 1)}
+                          onClick={() => updateQuantity(item.productId, 1)}
                           className="p-1 rounded-full hover:bg-gray-100"
                         >
                           <PlusIcon className="h-4 w-4" />

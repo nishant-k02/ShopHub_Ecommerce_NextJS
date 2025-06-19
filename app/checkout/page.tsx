@@ -6,7 +6,7 @@ import { useCart } from '../context/CartContext';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cartItems, getSubtotal, clearCart } = useCart();
+  const { cartItems, getSubtotal, clearCart, loading, error } = useCart();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -29,17 +29,51 @@ export default function CheckoutPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would process the payment and create the order
-    clearCart(); // Clear the cart after successful order
-    router.push('/checkout/success');
+    try {
+      // In a real app, this would process the payment and create the order
+      await clearCart(); // Clear the cart after successful order
+      router.push('/checkout/success');
+    } catch (error) {
+      console.error('Error processing order:', error);
+      // Handle error (show error message to user)
+    }
   };
 
   const subtotal = getSubtotal();
   const shipping = 10;
   const tax = subtotal * 0.1; // 10% tax
   const total = subtotal + shipping + tax;
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading checkout...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="btn btn-primary"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Redirect to cart if cart is empty
   if (cartItems.length === 0) {
@@ -239,13 +273,13 @@ export default function CheckoutPage() {
               {/* Cart Items */}
               <div className="space-y-4 mb-6">
                 {cartItems.map((item) => (
-                  <div key={item.product.id} className="flex items-center">
+                  <div key={item.id} className="flex items-center">
                     <div className="flex-1">
-                      <h3 className="text-sm font-medium text-gray-900">{item.product.name}</h3>
+                      <h3 className="text-sm font-medium text-gray-900">{item.name}</h3>
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
                     <p className="text-sm font-medium text-gray-900">
-                      ${(item.product.price * item.quantity).toFixed(2)}
+                      ${(item.price * item.quantity).toFixed(2)}
                     </p>
                   </div>
                 ))}
