@@ -1,22 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// In a real app, this would be stored in a database
-// For now, we'll use a simple in-memory store
-let cartItems: Array<{
-  id: string;
-  productId: string;
-  quantity: number;
-  name: string;
-  price: number;
-  imageUrl: string;
-}> = [];
+import { getCartCollection, getProductsCollection } from '../../lib/db';
 
 export async function GET() {
   try {
+    const cartCollection = await getCartCollection();
+    const cartItems = await cartCollection.find({}).toArray();
+
+    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
     return NextResponse.json({
       items: cartItems,
-      totalItems: cartItems.reduce((sum, item) => sum + item.quantity, 0),
-      subtotal: cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+      totalItems,
+      subtotal
     });
   } catch (error) {
     console.error('Error fetching cart:', error);
@@ -39,10 +35,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // In a real app, you would fetch product details from your database
-    // For now, we'll use the products from product-data
-    const { products } = await import('../../product-data');
-    const product = products.find(p => p.id === productId);
+    // Fetch product details from database
+    const productsCollection = await getProductsCollection();
+    const product = await productsCollection.findOne({ id: productId });
 
     if (!product) {
       return NextResponse.json(
@@ -51,15 +46,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if item already exists in cart
-    const existingItemIndex = cartItems.findIndex(item => item.productId === productId);
+    const cartCollection = await getCartCollection();
 
-    if (existingItemIndex !== -1) {
+    // Check if item already exists in cart
+    const existingItem = await cartCollection.findOne({ productId });
+
+    if (existingItem) {
       // Update quantity of existing item
-      cartItems[existingItemIndex].quantity += quantity;
+      await cartCollection.updateOne(
+        { productId },
+        { $inc: { quantity } }
+      );
     } else {
       // Add new item to cart
-      cartItems.push({
+      await cartCollection.insertOne({
         id: `${productId}-${Date.now()}`, // Generate unique ID
         productId,
         quantity,
@@ -69,12 +69,17 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Get updated cart
+    const cartItems = await cartCollection.find({}).toArray();
+    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
     return NextResponse.json({
       message: 'Item added to cart successfully',
       cart: {
         items: cartItems,
-        totalItems: cartItems.reduce((sum, item) => sum + item.quantity, 0),
-        subtotal: cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        totalItems,
+        subtotal
       }
     });
   } catch (error) {
@@ -98,29 +103,30 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const itemIndex = cartItems.findIndex(item => item.productId === productId);
-
-    if (itemIndex === -1) {
-      return NextResponse.json(
-        { error: 'Item not found in cart' },
-        { status: 404 }
-      );
-    }
+    const cartCollection = await getCartCollection();
 
     if (quantity <= 0) {
       // Remove item if quantity is 0 or negative
-      cartItems.splice(itemIndex, 1);
+      await cartCollection.deleteOne({ productId });
     } else {
       // Update quantity
-      cartItems[itemIndex].quantity = quantity;
+      await cartCollection.updateOne(
+        { productId },
+        { $set: { quantity } }
+      );
     }
+
+    // Get updated cart
+    const cartItems = await cartCollection.find({}).toArray();
+    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     return NextResponse.json({
       message: 'Cart updated successfully',
       cart: {
         items: cartItems,
-        totalItems: cartItems.reduce((sum, item) => sum + item.quantity, 0),
-        subtotal: cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        totalItems,
+        subtotal
       }
     });
   } catch (error) {
@@ -144,23 +150,27 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const itemIndex = cartItems.findIndex(item => item.productId === productId);
+    const cartCollection = await getCartCollection();
+    const result = await cartCollection.deleteOne({ productId });
 
-    if (itemIndex === -1) {
+    if (result.deletedCount === 0) {
       return NextResponse.json(
         { error: 'Item not found in cart' },
         { status: 404 }
       );
     }
 
-    cartItems.splice(itemIndex, 1);
+    // Get updated cart
+    const cartItems = await cartCollection.find({}).toArray();
+    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     return NextResponse.json({
       message: 'Item removed from cart successfully',
       cart: {
         items: cartItems,
-        totalItems: cartItems.reduce((sum, item) => sum + item.quantity, 0),
-        subtotal: cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        totalItems,
+        subtotal
       }
     });
   } catch (error) {

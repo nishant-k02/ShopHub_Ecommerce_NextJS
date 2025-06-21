@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { products } from '../../product-data';
+import { getProductsCollection } from '../../lib/db';
 
 export async function GET(request: Request) {
   try {
@@ -11,55 +11,58 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
 
-    // Start with all products
-    let filteredProducts = [...products];
+    const collection = await getProductsCollection();
 
-    // Apply category filter if provided
+    // Build the filter object
+    const filter: any = {};
+    
     if (category) {
-      filteredProducts = filteredProducts.filter(product => 
-        product.category?.toLowerCase() === category.toLowerCase()
-      );
+      filter.category = { $regex: category, $options: 'i' };
     }
 
-    // Apply search filter if provided
     if (search) {
-      const searchLower = search.toLowerCase();
-      filteredProducts = filteredProducts.filter(product =>
-        product.name.toLowerCase().includes(searchLower) ||
-        product.description.toLowerCase().includes(searchLower)
-      );
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
 
-    // Apply sorting if provided
+    // Build the sort object
+    let sortObj: any = {};
     if (sort) {
       switch (sort) {
         case 'price_asc':
-          filteredProducts.sort((a, b) => a.price - b.price);
+          sortObj.price = 1;
           break;
         case 'price_desc':
-          filteredProducts.sort((a, b) => b.price - a.price);
+          sortObj.price = -1;
           break;
         case 'name_asc':
-          filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+          sortObj.name = 1;
           break;
         case 'name_desc':
-          filteredProducts.sort((a, b) => b.name.localeCompare(a.name));
+          sortObj.name = -1;
           break;
         default:
           break;
       }
     }
 
-    // Calculate pagination
-    const totalItems = filteredProducts.length;
+    // Get total count for pagination
+    const totalItems = await collection.countDocuments(filter);
     const totalPages = Math.ceil(totalItems / limit);
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
+    // Get paginated products
+    const products = await collection
+      .find(filter)
+      .sort(sortObj)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .toArray();
 
     // Return the response with pagination metadata
     return NextResponse.json({
-      products: paginatedProducts,
+      products,
       pagination: {
         totalItems,
         totalPages,

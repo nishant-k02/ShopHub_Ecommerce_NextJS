@@ -1,25 +1,22 @@
 import { NextResponse } from 'next/server';
-import { products } from '../../../product-data';
+import { getProductsCollection } from '../../../lib/db';
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const product = products.find(p => p.id === params.id);
+    const collection = await getProductsCollection();
+    const product = await collection.findOne({ id: params.id });
 
     if (!product) {
-      return new Response("Product not found", {
-            status: 404,
-        });
+      return NextResponse.json(
+        { error: 'Product not found' },
+        { status: 404 }
+      );
     }
 
-    return new Response(JSON.stringify(product), {
-        status: 200,
-        headers: {
-            contentType: "application/json"
-        }
-    });
+    return NextResponse.json(product);
   } catch (error) {
     console.error('Error fetching product:', error);
     return NextResponse.json(
