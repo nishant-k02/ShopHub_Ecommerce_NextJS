@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Product } from './product-data';
+import { Product } from './lib/db';
 
 export default function ProductsList({ products } : { products: Product[] }) {
     return (

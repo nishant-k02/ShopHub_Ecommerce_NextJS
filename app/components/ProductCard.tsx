@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { HeartIcon, ShoppingCartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { useState } from 'react';
-import { Product } from '../product-data';
+import { Product } from '../lib/db';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../context/CartContext';
 

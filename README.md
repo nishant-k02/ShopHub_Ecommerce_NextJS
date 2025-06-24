@@ -55,7 +55,7 @@ A modern e-commerce website built with Next.js, TypeScript, Tailwind CSS, and Mo
 3. Set up environment variables:
    Create a `.env.local` file in the root directory:
    ```env
-   MONGODB_URI=mongodb+srv://your_username:your_password@your_cluster.mongodb.net/ecommerce?retryWrites=true&w=majority
+   MONGODB_URI=your_mongod_credentials
    ```
    
    Replace:
@@ -126,7 +126,7 @@ Create a `.env.local` file with:
 
 ```env
 # MongoDB Atlas Connection String
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/ecommerce?retryWrites=true&w=majority
+MONGODB_URI=""
 
 # Optional: Database name (if not specified in connection string)
 MONGODB_DB_NAME=ecommerce

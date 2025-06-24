@@ -2,13 +2,34 @@
 
 import Navbar from './components/Navbar';
 import ProductCard from './components/ProductCard';
-import { products } from './product-data';
+import { useEffect, useState } from 'react';
+import { Product } from './lib/db';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const router = useRouter();
-  const featuredProducts = products.slice(0, 8);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchFeaturedProducts() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch('/api/products?limit=8');
+        if (!res.ok) throw new Error('Failed to fetch featured products');
+        const data = await res.json();
+        setFeaturedProducts(data.products || []);
+      } catch (err: any) {
+        setError(err.message || 'Error loading featured products');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchFeaturedProducts();
+  }, []);
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -44,11 +65,18 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Products</h2>
           <p className="text-gray-600">Discover our handpicked selection of the best products</p>
         </div>
-        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {loading ? (
+            <div className="col-span-4 text-center">Loading...</div>
+          ) : error ? (
+            <div className="col-span-4 text-center text-red-500">{error}</div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="col-span-4 text-center">No featured products found.</div>
+          ) : (
+            featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          )}
         </div>
       </section>
 

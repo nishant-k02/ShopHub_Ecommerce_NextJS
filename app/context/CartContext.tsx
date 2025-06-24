@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Product } from '../product-data';
+import { Product } from '../lib/db';
 import { cartApi, CartItem, CartResponse } from '../utils/cartApi';
 import { useToast } from './ToastContext';
 

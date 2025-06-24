@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { products } from '../../product-data';
+import { Product } from '../../lib/db';
 import { 
   HeartIcon, 
   ShoppingCartIcon, 
@@ -17,65 +17,106 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
-// Mock product specifications - in a real app, this would come from your database
-const getProductSpecs = (productId: string) => {
-  const specs = {
-    dimensions: '10 x 5 x 2 inches',
-    weight: '1.5 lbs',
-    material: 'Premium materials',
-    color: 'Multiple colors available',
-    warranty: '2 years',
-    inStock: true,
-    sku: `SKU-${productId}`,
-    brand: 'Premium Brand',
-    category: 'Electronics',
-    features: [
-      'High-quality construction',
-      'Easy to use',
-      'Durable design',
-      'Modern aesthetics',
-      'Energy efficient'
-    ],
-    specifications: {
-      'Product Type': 'Premium Product',
-      'Model Number': `MOD-${productId}`,
-      'Manufacturer': 'Premium Brand',
-      'Country of Origin': 'United States',
-      'Assembly Required': 'No',
-      'Battery Included': 'Yes',
-      'Battery Type': 'Lithium-ion',
-      'Warranty Period': '2 years',
-      'Certification': 'CE, FCC, RoHS'
-    }
-  };
-  return specs;
-};
-
 export default function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [selectedTab, setSelectedTab] = useState('description');
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isImageZoomed, setIsImageZoomed] = useState(false);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [specs, setSpecs] = useState<any>(null);
+  const [id, setId] = useState<string>('');
 
-  // Unwrap params using React.use()
-  const { id } = use(params);
-  const product = products.find(p => p.id === id);
-  const specs = product ? getProductSpecs(product.id) : null;
+  useEffect(() => {
+    (async () => {
+      const resolved = await params;
+      setId(resolved.id);
+    })();
+  }, [params]);
+
+  useEffect(() => {
+    if (!id) return;
+    async function fetchProduct() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(`/api/products/${id}`);
+        if (!res.ok) throw new Error('Product not found');
+        const data = await res.json();
+        setProduct(data);
+        // Optionally, fetch related products by category if available
+        let relatedRes;
+        if (data.category) {
+          relatedRes = await fetch(`/api/products?category=${encodeURIComponent(data.category)}&limit=4`);
+        } else {
+          relatedRes = await fetch(`/api/products?limit=4`);
+        }
+        const relatedData = await relatedRes.json();
+        setRelatedProducts((relatedData.products || []).filter((p: Product) => p.id !== data.id));
+        // Optionally, set specs if you want to keep the mock for now
+        setSpecs({
+          dimensions: '10 x 5 x 2 inches',
+          weight: '1.5 lbs',
+          material: 'Premium materials',
+          color: 'Multiple colors available',
+          warranty: '2 years',
+          inStock: true,
+          sku: `SKU-${data.id}`,
+          brand: 'Premium Brand',
+          category: data.category || 'Electronics',
+          features: [
+            'High-quality construction',
+            'Easy to use',
+            'Durable design',
+            'Modern aesthetics',
+            'Energy efficient'
+          ],
+          specifications: {
+            'Product Type': 'Premium Product',
+            'Model Number': `MOD-${data.id}`,
+            'Manufacturer': 'Premium Brand',
+            'Country of Origin': 'United States',
+            'Assembly Required': 'No',
+            'Battery Included': 'Yes',
+            'Battery Type': 'Lithium-ion',
+            'Warranty Period': '2 years',
+            'Certification': 'CE, FCC, RoHS'
+          }
+        });
+      } catch (err: any) {
+        let message = 'Error loading product';
+        if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
+          message = err.message;
+        } else if (typeof err === 'string') {
+          message = err;
+        }
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProduct();
+  }, [id]);
 
   // Mock additional product images - in a real app, these would come from your database
-  const productImages = [
-    product?.imageUrl,
+  const productImages = product ? [
+    product.imageUrl,
     'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
     'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80',
     'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=800&q=80'
-  ].filter(Boolean) as string[];
+  ].filter(Boolean) as string[] : [];
 
-  if (!product || !specs) {
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  if (error || !product || !specs) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">{error || 'Product Not Found'}</h1>
           <button
             onClick={() => router.push('/products')}
             className="btn btn-primary"
@@ -86,8 +127,6 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
       </div>
     );
   }
-
-  const relatedProducts = products.filter(p => p.id !== product.id).slice(0, 4);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -255,7 +294,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
             <div className="mt-8">
               <h3 className="text-sm font-medium text-gray-900">Key Features</h3>
               <ul className="mt-4 space-y-2">
-                {specs.features.map((feature, index) => (
+                {specs.features.map((feature: string, index: number) => (
                   <li key={index} className="flex items-start">
                     <CheckCircleIcon className="h-5 w-5 text-green-500 mt-0.5" />
                     <span className="ml-2 text-sm text-gray-600">{feature}</span>
@@ -304,7 +343,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                 {Object.entries(specs.specifications).map(([key, value]) => (
                   <div key={key} className="flex justify-between py-2 border-b">
                     <span className="text-gray-600">{key}</span>
-                    <span className="text-gray-900 font-medium">{value}</span>
+                    <span className="text-gray-900 font-medium">{String(value)}</span>
                   </div>
                 ))}
               </div>

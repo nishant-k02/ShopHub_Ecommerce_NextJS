@@ -1,37 +1,51 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
-import { products } from '../product-data';
+import { Product } from '../lib/db';
 import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Filter products based on search and category
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || 
-                          product.name.toLowerCase().includes(selectedCategory.toLowerCase());
-    return matchesSearch && matchesCategory;
-  });
-
-  // Sort products
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low':
-        return a.price - b.price;
-      case 'price-high':
-        return b.price - a.price;
-      case 'name':
-        return a.name.localeCompare(b.name);
-      default:
-        return 0;
+  useEffect(() => {
+    async function fetchProducts() {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams();
+        if (searchQuery) params.append('search', searchQuery);
+        if (selectedCategory !== 'all') params.append('category', selectedCategory);
+        switch (sortBy) {
+          case 'price-low':
+            params.append('sort', 'price_asc');
+            break;
+          case 'price-high':
+            params.append('sort', 'price_desc');
+            break;
+          case 'name':
+            params.append('sort', 'name_asc');
+            break;
+          default:
+            break;
+        }
+        const res = await fetch(`/api/products?${params.toString()}`);
+        if (!res.ok) throw new Error('Failed to fetch products');
+        const data = await res.json();
+        setProducts(data.products || []);
+      } catch (err: any) {
+        setError(err.message || 'Error loading products');
+      } finally {
+        setLoading(false);
+      }
     }
-  });
+    fetchProducts();
+  }, [searchQuery, selectedCategory, sortBy]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -86,13 +100,21 @@ export default function ProductsPage() {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {sortedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {loading ? (
+            <div className="col-span-4 text-center">Loading...</div>
+          ) : error ? (
+            <div className="col-span-4 text-center text-red-500">{error}</div>
+          ) : products.length === 0 ? (
+            <div className="col-span-4 text-center">No products found</div>
+          ) : (
+            products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          )}
         </div>
 
         {/* Empty State */}
-        {sortedProducts.length === 0 && (
+        {products.length === 0 && (
           <div className="text-center py-12">
             <AdjustmentsHorizontalIcon className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No products found</h3>
