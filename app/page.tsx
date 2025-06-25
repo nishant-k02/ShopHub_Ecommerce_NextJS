@@ -1,6 +1,5 @@
 'use client';
 
-import Navbar from './components/Navbar';
 import ProductCard from './components/ProductCard';
 import { useEffect, useState } from 'react';
 import { Product } from './lib/db';
@@ -22,8 +21,9 @@ export default function Home() {
         if (!res.ok) throw new Error('Failed to fetch featured products');
         const data = await res.json();
         setFeaturedProducts(data.products || []);
-      } catch (err: any) {
-        setError(err.message || 'Error loading featured products');
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Error loading featured products';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }

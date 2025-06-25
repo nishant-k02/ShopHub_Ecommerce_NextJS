@@ -7,7 +7,6 @@ import { Product } from '../../lib/db';
 import { 
   HeartIcon, 
   ShoppingCartIcon, 
-  StarIcon, 
   TruckIcon, 
   ShieldCheckIcon, 
   ArrowPathIcon,
@@ -27,7 +26,19 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [specs, setSpecs] = useState<any>(null);
+  const [specs, setSpecs] = useState<{
+    dimensions: string;
+    weight: string;
+    material: string;
+    color: string;
+    warranty: string;
+    inStock: boolean;
+    sku: string;
+    brand: string;
+    category: string;
+    features: string[];
+    specifications: Record<string, string>;
+  } | null>(null);
   const [id, setId] = useState<string>('');
 
   useEffect(() => {
@@ -86,7 +97,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
             'Certification': 'CE, FCC, RoHS'
           }
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         let message = 'Error loading product';
         if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
           message = err.message;
@@ -368,7 +379,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                       <span className="text-sm text-gray-500">2 months ago</span>
                     </div>
                     <p className="text-gray-600">
-                      This product exceeded my expectations. The quality is outstanding and it's exactly 
+                      This product exceeded my expectations. The quality is outstanding and it&apos;s exactly 
                       what I was looking for. Highly recommend!
                     </p>
                   </div>

@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     const collection = await getProductsCollection();
 
     // Build the filter object
-    const filter: any = {};
+    const filter: Record<string, unknown> = {};
     
     if (category) {
       filter.category = { $regex: category, $options: 'i' };
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     }
 
     // Build the sort object
-    let sortObj: any = {};
+    const sortObj: Record<string, 1 | -1> = {};
     if (sort) {
       switch (sort) {
         case 'price_asc':

@@ -64,7 +64,7 @@ export default function CartPage() {
               </svg>
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
-            <p className="text-gray-500 mb-6">Looks like you haven't added any items to your cart yet.</p>
+            <p className="text-gray-500 mb-6">Looks like you haven&apos;t added any items to your cart yet.</p>
             <button 
               onClick={() => router.push('/products')} 
               className="btn btn-primary"
