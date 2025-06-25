@@ -5,6 +5,17 @@ export async function GET(request: Request) {
   try {
     console.log('API: Fetching products...');
     
+    // Check if environment variables are set
+    if (!process.env.MONGODB_URI) {
+      console.error('API: MONGODB_URI environment variable is not set');
+      return NextResponse.json(
+        { error: 'Database configuration error: MONGODB_URI not set' },
+        { status: 500 }
+      );
+    }
+    
+    console.log('API: MONGODB_URI is configured');
+    
     // Get query parameters from the URL
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
