@@ -17,12 +17,22 @@ export default function Home() {
       setLoading(true);
       setError(null);
       try {
+        console.log('Fetching featured products...');
         const res = await fetch('/api/products?limit=8');
-        if (!res.ok) throw new Error('Failed to fetch featured products');
+        console.log('Response status:', res.status);
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('API Error:', errorText);
+          throw new Error(`Failed to fetch featured products: ${res.status} ${errorText}`);
+        }
+        
         const data = await res.json();
+        console.log('Products data:', data);
         setFeaturedProducts(data.products || []);
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Error loading featured products';
+        console.error('Fetch error:', err);
         setError(errorMessage);
       } finally {
         setLoading(false);

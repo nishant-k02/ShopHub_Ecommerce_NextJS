@@ -3,6 +3,8 @@ import { getProductsCollection } from '../../lib/db';
 
 export async function GET(request: Request) {
   try {
+    console.log('API: Fetching products...');
+    
     // Get query parameters from the URL
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
@@ -11,7 +13,10 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
 
+    console.log('API: Query params:', { category, search, sort, page, limit });
+
     const collection = await getProductsCollection();
+    console.log('API: Database collection connected');
 
     // Build the filter object
     const filter: Record<string, unknown> = {};
@@ -26,6 +31,8 @@ export async function GET(request: Request) {
         { description: { $regex: search, $options: 'i' } }
       ];
     }
+
+    console.log('API: Filter:', filter);
 
     // Build the sort object
     const sortObj: Record<string, 1 | -1> = {};
@@ -52,6 +59,8 @@ export async function GET(request: Request) {
     const totalItems = await collection.countDocuments(filter);
     const totalPages = Math.ceil(totalItems / limit);
 
+    console.log('API: Total items:', totalItems);
+
     // Get paginated products
     const products = await collection
       .find(filter)
@@ -59,6 +68,8 @@ export async function GET(request: Request) {
       .skip((page - 1) * limit)
       .limit(limit)
       .toArray();
+
+    console.log('API: Found products:', products.length);
 
     // Return the response with pagination metadata
     return NextResponse.json({
@@ -73,9 +84,9 @@ export async function GET(request: Request) {
       }
     });
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error('API: Error fetching products:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error' },
+      { error: 'Internal Server Error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
