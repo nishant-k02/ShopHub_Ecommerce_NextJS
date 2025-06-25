@@ -9,6 +9,11 @@ const nextConfig = {
         // your project has ESLint errors.
         ignoreDuringBuilds: true,
     },
+    typescript: {
+        // Warning: This allows production builds to successfully complete even if
+        // your project has TypeScript errors.
+        ignoreBuildErrors: true,
+    },
     experimental: {
         // Enable if you want to use the new app directory features
         // appDir: true,

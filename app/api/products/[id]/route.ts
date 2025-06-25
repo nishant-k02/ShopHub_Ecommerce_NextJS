@@ -3,11 +3,12 @@ import { getProductsCollection } from '../../../lib/db';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const collection = await getProductsCollection();
-    const product = await collection.findOne({ id: params.id });
+    const product = await collection.findOne({ id });
 
     if (!product) {
       return NextResponse.json(
