@@ -9,7 +9,14 @@ export async function GET(request: Request) {
     if (!process.env.MONGODB_URI) {
       console.error('API: MONGODB_URI environment variable is not set');
       return NextResponse.json(
-        { error: 'Database configuration error: MONGODB_URI not set' },
+        { 
+          error: 'Database configuration error: MONGODB_URI not set',
+          debug: {
+            hasMongoUri: !!process.env.MONGODB_URI,
+            hasMongoDbName: !!process.env.MONGODB_DB_NAME,
+            nodeEnv: process.env.NODE_ENV
+          }
+        },
         { status: 500 }
       );
     }
