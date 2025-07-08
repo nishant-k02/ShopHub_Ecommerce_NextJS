@@ -10,6 +10,16 @@ export interface Product {
   category?: string;
 }
 
+export interface User {
+  _id?: string;
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface CartItem {
   _id?: string;
   id: string;
@@ -42,6 +52,17 @@ export async function getProductsCollection() {
     return db.collection<Product>('products');
   } catch (error) {
     console.error('Error connecting to products collection:', error);
+    throw error;
+  }
+}
+
+export async function getUsersCollection() {
+  try {
+    const client = await clientPromise;
+    const db = client.db(getDatabaseName());
+    return db.collection<User>('users');
+  } catch (error) {
+    console.error('Error connecting to users collection:', error);
     throw error;
   }
 }

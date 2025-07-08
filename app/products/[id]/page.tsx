@@ -130,7 +130,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
           <h1 className="text-2xl font-bold text-gray-900 mb-4">{error || 'Product Not Found'}</h1>
           <button
             onClick={() => router.push('/products')}
-            className="btn btn-primary"
+            className="px-6 py-3 bg-gradient-to-r from-primary to-accent text-white font-medium rounded-xl hover:from-primary/90 hover:to-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
           >
             Back to Products
           </button>
@@ -276,27 +276,27 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
 
             <div className="mt-6">
               <div className="flex items-center space-x-4">
-                <div className="flex items-center border rounded-md">
+                <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-3 py-2 text-gray-600 hover:bg-gray-100"
+                    className="px-4 py-3 text-gray-600 hover:bg-gray-50 transition-colors font-medium"
                   >
                     -
                   </button>
-                  <span className="px-4 py-2 text-gray-900">{quantity}</span>
+                  <span className="px-6 py-3 text-gray-900 font-medium border-x-2 border-gray-200 bg-gray-50">{quantity}</span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="px-3 py-2 text-gray-600 hover:bg-gray-100"
+                    className="px-4 py-3 text-gray-600 hover:bg-gray-50 transition-colors font-medium"
                   >
                     +
                   </button>
                 </div>
                 <button
                   onClick={() => router.push('/cart')}
-                  className="flex-1 btn btn-primary flex items-center justify-center gap-2"
+                  className="flex-1 flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-primary to-accent text-white font-medium rounded-xl hover:from-primary/90 hover:to-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
                 >
-                  <ShoppingCartIcon className="h-5 w-5" />
-                  Add to Cart
+                  <ShoppingCartIcon className="h-6 w-6" />
+                  <span className="text-lg">Add to Cart</span>
                 </button>
               </div>
             </div>
@@ -392,7 +392,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         {/* Related Products */}
         <div className="mt-16">
           <h2 className="text-2xl font-bold text-gray-900 mb-8">You may also like</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {relatedProducts.map((relatedProduct) => (
               <div
                 key={relatedProduct.id}

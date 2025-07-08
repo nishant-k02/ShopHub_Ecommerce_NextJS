@@ -13,6 +13,26 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Handle URL search parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    const categoryParam = urlParams.get('category');
+    
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    }
+    if (categoryParam) {
+      // Map category names to select values
+      const categoryMap: { [key: string]: string } = {
+        'Electronics': 'electronics',
+        'Fashion': 'fashion',
+        'Home & Living': 'home'
+      };
+      setSelectedCategory(categoryMap[categoryParam] || categoryParam.toLowerCase());
+    }
+  }, []);
+
   useEffect(() => {
     async function fetchProducts() {
       setLoading(true);
@@ -68,9 +88,9 @@ export default function ProductsPage() {
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="input pl-10"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900 placeholder-gray-500 bg-white shadow-sm"
             />
-            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
           </div>
 
           {/* Filters */}
@@ -78,7 +98,7 @@ export default function ProductsPage() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="input max-w-[200px]"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900 bg-white shadow-sm max-w-[200px]"
             >
               <option value="all">All Categories</option>
               <option value="electronics">Electronics</option>
@@ -89,7 +109,7 @@ export default function ProductsPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="input max-w-[200px]"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900 bg-white shadow-sm max-w-[200px]"
             >
               <option value="featured">Featured</option>
               <option value="price-low">Price: Low to High</option>
@@ -100,7 +120,7 @@ export default function ProductsPage() {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {loading ? (
             <div className="col-span-4 text-center">Loading...</div>
           ) : error ? (

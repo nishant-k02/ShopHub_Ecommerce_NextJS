@@ -66,7 +66,7 @@ export default function CheckoutPage() {
           <p className="text-red-600 mb-4">{error}</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="btn btn-primary"
+            className="px-6 py-3 bg-gradient-to-r from-primary to-accent text-white font-medium rounded-xl hover:from-primary/90 hover:to-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
           >
             Retry
           </button>
@@ -308,7 +308,7 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 onClick={handleSubmit}
-                className="btn btn-primary w-full mt-6"
+                className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-primary to-accent text-white font-medium rounded-xl hover:from-primary/90 hover:to-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl text-lg"
               >
                 Place Order
               </button>
