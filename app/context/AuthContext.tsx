@@ -13,6 +13,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<User | null>;
   isLoading: boolean;
 }
 
@@ -100,11 +101,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const response = await fetch('/api/auth/me', {
+        credentials: 'include', // Ensure cookies are included
+        cache: 'no-cache' // Prevent caching to get fresh data
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        return data.user;
+      } else {
+        console.error('Failed to refresh user data');
+        return null;
+      }
+    } catch (error) {
+      console.error('Refresh user failed:', error);
+      return null;
+    }
+  };
+
   const value = {
     user,
     login,
     signup,
     logout,
+    refreshUser,
     isLoading,
   };
 

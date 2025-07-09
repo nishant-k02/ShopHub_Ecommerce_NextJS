@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Product } from '../../lib/db';
+import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
+import { useAuth } from '../../context/AuthContext';
 import { 
   HeartIcon, 
   ShoppingCartIcon, 
@@ -18,14 +21,17 @@ import { HeartIcon as HeartIconSolid, StarIcon as StarIconSolid } from '@heroico
 
 export default function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { user } = useAuth();
+  const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [selectedTab, setSelectedTab] = useState('description');
   const [quantity, setQuantity] = useState(1);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [isImageZoomed, setIsImageZoomed] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [addingToCart, setAddingToCart] = useState(false);
   const [specs, setSpecs] = useState<{
     dimensions: string;
     weight: string;
@@ -112,6 +118,45 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     fetchProduct();
   }, [id]);
 
+  const handleAddToCart = async () => {
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
+
+    if (!product) return;
+
+    setAddingToCart(true);
+    try {
+      for (let i = 0; i < quantity; i++) {
+        await addToCart(product);
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    } finally {
+      setAddingToCart(false);
+    }
+  };
+
+  const handleWishlistToggle = async () => {
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
+
+    if (!product) return;
+
+    try {
+      if (isInWishlist(product.id)) {
+        await removeFromWishlist(product.id);
+      } else {
+        await addToWishlist(product);
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+    }
+  };
+
   // Mock additional product images - in a real app, these would come from your database
   const productImages = product ? [
     product.imageUrl,
@@ -121,8 +166,16 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
   ].filter(Boolean) as string[] : [];
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading product details...</p>
+        </div>
+      </div>
+    );
   }
+
   if (error || !product || !specs) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -134,6 +187,45 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
           >
             Back to Products
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if user is not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <div className="mx-auto h-16 w-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mb-6">
+              <ShoppingCartIcon className="h-8 w-8 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Login Required</h1>
+            <p className="text-gray-600 mb-6">
+              Please login to view product details and add items to your cart.
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => router.push('/auth/login')}
+                className="w-full px-6 py-3 bg-gradient-to-r from-primary to-accent text-white font-medium rounded-xl hover:from-primary/90 hover:to-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => router.push('/auth/signup')}
+                className="w-full px-6 py-3 bg-white text-gray-700 font-medium rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200"
+              >
+                Create Account
+              </button>
+              <button
+                onClick={() => router.push('/products')}
+                className="w-full text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                Back to Products
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -199,52 +291,27 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                       src={image}
                       alt={`${product.name} - View ${index + 1}`}
                       fill
-                      sizes="(max-width: 768px) 25vw, (max-width: 1200px) 12vw, 8vw"
-                      className="object-cover hover:scale-105 transition-transform duration-200"
+                      sizes="(max-width: 768px) 25vw, 12vw"
+                      className="object-contain"
                     />
                   </div>
                 ))}
-              </div>
-
-              {/* Product Status */}
-              <div className="mt-6 flex items-center justify-between">
-                <div className="flex items-center">
-                  <CheckCircleIcon className={`h-5 w-5 ${specs.inStock ? 'text-green-500' : 'text-red-500'}`} />
-                  <span className="ml-2 text-sm text-gray-600">
-                    {specs.inStock ? 'In Stock' : 'Out of Stock'}
-                  </span>
-                </div>
-                <span className="text-sm text-gray-500">SKU: {specs.sku}</span>
               </div>
             </div>
           </div>
 
           {/* Product Info */}
-          <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
-            <div className="flex justify-between items-start">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900">{product.name}</h1>
-                <p className="mt-2 text-sm text-gray-500">Brand: {specs.brand}</p>
-                <div className="mt-3 flex items-center">
-                  <div className="flex items-center">
-                    {[0, 1, 2, 3, 4].map((rating) => (
-                      <StarIconSolid
-                        key={rating}
-                        className="h-5 w-5 text-yellow-400"
-                      />
-                    ))}
-                  </div>
-                  <p className="ml-2 text-sm text-gray-500">(24 reviews)</p>
-                </div>
-              </div>
+          <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
+            <div className="flex items-start justify-between">
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900">{product.name}</h1>
               <button
-                onClick={() => setIsFavorite(!isFavorite)}
-                className="p-2 rounded-full hover:bg-gray-100"
+                onClick={handleWishlistToggle}
+                className="ml-4 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
               >
-                {isFavorite ? (
+                {isInWishlist(product.id) ? (
                   <HeartIconSolid className="h-6 w-6 text-red-500" />
                 ) : (
-                  <HeartIcon className="h-6 w-6 text-gray-400" />
+                  <HeartIcon className="h-6 w-6 text-gray-400 hover:text-red-500" />
                 )}
               </button>
             </div>
@@ -292,11 +359,21 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                   </button>
                 </div>
                 <button
-                  onClick={() => router.push('/cart')}
-                  className="flex-1 flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-primary to-accent text-white font-medium rounded-xl hover:from-primary/90 hover:to-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+                  onClick={handleAddToCart}
+                  disabled={addingToCart}
+                  className="flex-1 flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-primary to-accent text-white font-medium rounded-xl hover:from-primary/90 hover:to-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  <ShoppingCartIcon className="h-6 w-6" />
-                  <span className="text-lg">Add to Cart</span>
+                  {addingToCart ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span className="text-lg">Adding...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCartIcon className="h-6 w-6" />
+                      <span className="text-lg">Add to Cart</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>

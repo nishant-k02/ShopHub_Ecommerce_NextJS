@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { Product } from '../lib/db';
 import { cartApi, CartItem } from '../utils/cartApi';
 import { useToast } from './ToastContext';
+import { useAuth } from './AuthContext';
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -21,29 +22,48 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { addToast } = useToast();
+  const { user } = useAuth();
 
-  // Load cart on mount
+  // Load cart when user is authenticated
   useEffect(() => {
-    loadCart();
-  }, []);
+    if (user) {
+      loadCart();
+    } else {
+      setCartItems([]); // Clear cart when user logs out
+    }
+  }, [user]);
 
   const loadCart = async () => {
+    if (!user) return;
+    
     try {
       setLoading(true);
       setError(null);
       const cartData = await cartApi.getCart();
       setCartItems(cartData.items);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load cart');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load cart';
+      if (errorMessage.includes('Authentication required')) {
+        // User is not authenticated, clear cart
+        setCartItems([]);
+        setError(null);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const addToCart = async (product: Product) => {
+    if (!user) {
+      addToast('Please login to add items to cart', 'error', 4000);
+      return;
+    }
+
     try {
       setError(null);
       const cartData = await cartApi.addToCart(product.id);
@@ -60,6 +80,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const removeFromCart = async (productId: string) => {
+    if (!user) {
+      addToast('Please login to manage cart', 'error', 4000);
+      return;
+    }
+
     try {
       setError(null);
       const itemToRemove = cartItems.find(item => item.productId === productId);
@@ -79,6 +104,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const updateQuantity = async (productId: string, change: number) => {
+    if (!user) {
+      addToast('Please login to manage cart', 'error', 4000);
+      return;
+    }
+
     try {
       setError(null);
       const currentItem = cartItems.find(item => item.productId === productId);
@@ -103,6 +133,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const clearCart = async () => {
+    if (!user) {
+      addToast('Please login to manage cart', 'error', 4000);
+      return;
+    }
+
     try {
       setError(null);
       // Remove all items one by one (in a real app, you'd have a clear cart endpoint)

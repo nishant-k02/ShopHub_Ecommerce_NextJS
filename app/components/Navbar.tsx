@@ -1,9 +1,11 @@
 'use client';
 
-import { ShoppingCartIcon, UserIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { ShoppingCartIcon, UserIcon, MagnifyingGlassIcon, ChevronDownIcon, HeartIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,6 +13,11 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
+  const { getTotalItems } = useCart();
+  const { getTotalItems: getWishlistTotalItems } = useWishlist();
+
+  const cartItemCount = getTotalItems();
+  const wishlistItemCount = getWishlistTotalItems();
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -86,8 +93,24 @@ export default function Navbar() {
 
           {/* Icons */}
           <div className="flex items-center space-x-4">
-            <Link href="/cart" className="text-gray-700 hover:text-primary transition-colors">
+            {/* Wishlist Icon */}
+            <Link href="/wishlist" className="relative text-gray-700 hover:text-primary transition-colors">
+              <HeartIcon className="h-6 w-6" />
+              {user && wishlistItemCount > 0 && (
+                <span className="absolute -top-2 -right-2 h-5 w-5 bg-pink-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                  {wishlistItemCount > 99 ? '99+' : wishlistItemCount}
+                </span>
+              )}
+            </Link>
+
+            {/* Cart Icon */}
+            <Link href="/cart" className="relative text-gray-700 hover:text-primary transition-colors">
               <ShoppingCartIcon className="h-6 w-6" />
+              {user && cartItemCount > 0 && (
+                <span className="absolute -top-2 -right-2 h-5 w-5 bg-primary text-white text-xs rounded-full flex items-center justify-center font-medium">
+                  {cartItemCount > 99 ? '99+' : cartItemCount}
+                </span>
+              )}
             </Link>
             
             {/* User Menu */}
@@ -115,6 +138,13 @@ export default function Navbar() {
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         Account Settings
+                      </Link>
+                      <Link
+                        href="/wishlist"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        My Wishlist
                       </Link>
                       <Link
                         href="/orders"
@@ -207,33 +237,33 @@ export default function Navbar() {
             >
               Features
             </Link>
-            {user ? (
+            {user && (
               <>
                 <Link
-                  href="/account"
-                  className="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors"
+                  href="/wishlist"
+                  className="flex items-center justify-between px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Account
+                  <span>Wishlist</span>
+                  {wishlistItemCount > 0 && (
+                    <span className="bg-pink-500 text-white text-xs rounded-full px-2 py-1">
+                      {wishlistItemCount}
+                    </span>
+                  )}
                 </Link>
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors"
+                <Link
+                  href="/cart"
+                  className="flex items-center justify-between px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
                 >
-                  Sign Out
-                </button>
+                  <span>Cart</span>
+                  {cartItemCount > 0 && (
+                    <span className="bg-primary text-white text-xs rounded-full px-2 py-1">
+                      {cartItemCount}
+                    </span>
+                  )}
+                </Link>
               </>
-            ) : (
-              <Link
-                href="/auth/login"
-                className="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Sign In
-              </Link>
             )}
           </div>
         </div>
