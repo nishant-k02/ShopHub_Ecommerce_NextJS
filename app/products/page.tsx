@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
 import { Product } from '../lib/db';
 import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import Chatbot from '../components/Chatbot';
 
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -143,6 +144,9 @@ export default function ProductsPage() {
           </div>
         )}
       </div>
+            <div className="fixed bottom-6 right-6 z-50">
+              <Chatbot />
+            </div>
     </div>
   );
 }

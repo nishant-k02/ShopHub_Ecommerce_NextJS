@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Product } from './lib/db';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import Chatbot from './components/Chatbot';
 
 export default function Home() {
   const router = useRouter();
@@ -44,6 +45,8 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* <Navbar /> */}
+
+      
       
       {/* Hero Section */}
       <section className="relative h-[600px] bg-primary">
@@ -150,6 +153,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <div className="fixed bottom-6 right-6 z-50">
+        <Chatbot />
+      </div>
+
     </main>
   );
 }
