@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import ChatbotWrapper from "./components/ChatbotWrapper";
 import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
@@ -38,6 +39,7 @@ export default function RootLayout({
               <WishlistProvider>
                 <Navbar />
                 {children}
+                <ChatbotWrapper />
               </WishlistProvider>
             </CartProvider>
           </ToastProvider>

@@ -119,43 +119,47 @@ export default function Navbar() {
                 <div>
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center space-x-1 text-gray-700 hover:text-primary transition-colors"
+                    className="flex items-center space-x-1 text-gray-700 hover:text-primary transition-colors font-medium"
                   >
                     <UserIcon className="h-6 w-6" />
-                    <span className="hidden sm:block text-sm font-medium max-w-24 truncate">{user.name}</span>
+                    <span className="hidden md:block">{user.name}</span>
                     <ChevronDownIcon className="h-4 w-4" />
                   </button>
-                  
+
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                      <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
-                        Signed in as<br />
-                        <span className="font-medium text-gray-900 break-all">{user.email}</span>
-                      </div>
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
                       <Link
                         href="/account"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        Account Settings
-                      </Link>
-                      <Link
-                        href="/wishlist"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        My Wishlist
+                        My Account
                       </Link>
                       <Link
                         href="/orders"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         My Orders
                       </Link>
+                      <Link
+                        href="/addresses"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Addresses
+                      </Link>
+                      <Link
+                        href="/payment"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Payment Methods
+                      </Link>
+                      <hr className="my-1" />
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       >
                         Sign Out
                       </button>
@@ -163,111 +167,99 @@ export default function Navbar() {
                   )}
                 </div>
               ) : (
-                <Link href="/auth/login" className="text-gray-700 hover:text-primary transition-colors">
+                <Link
+                  href="/auth/login"
+                  className="flex items-center space-x-1 text-gray-700 hover:text-primary transition-colors font-medium"
+                >
                   <UserIcon className="h-6 w-6" />
+                  <span className="hidden md:block">Sign In</span>
                 </Link>
               )}
             </div>
 
             {/* Mobile menu button */}
-            <div className="md:hidden">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-gray-700 hover:text-primary transition-colors"
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden text-gray-700 hover:text-primary transition-colors"
+            >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 py-4">
+            {/* Mobile Search */}
+            <form onSubmit={handleSearch} className="mb-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search products..."
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900 placeholder-gray-500 bg-white"
+                />
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
+              </div>
+            </form>
+
+            {/* Mobile Navigation Links */}
+            <div className="space-y-2">
+              <Link
+                href="/products"
+                className="block text-gray-700 hover:text-primary font-medium transition-colors py-2"
+                onClick={() => setIsMenuOpen(false)}
               >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  {isMenuOpen ? (
-                    <path d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
+                Products
+              </Link>
+              <Link
+                href="/categories"
+                className="block text-gray-700 hover:text-primary font-medium transition-colors py-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Categories
+              </Link>
+              <Link
+                href="/deals"
+                className="block text-gray-700 hover:text-primary font-medium transition-colors py-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Features
+              </Link>
+              
+              {user && (
+                <>
+                  <hr className="my-2" />
+                  <Link
+                    href="/account"
+                    className="block text-gray-700 hover:text-primary font-medium transition-colors py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    My Account
+                  </Link>
+                  <Link
+                    href="/orders"
+                    className="block text-gray-700 hover:text-primary font-medium transition-colors py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    My Orders
+                  </Link>
+                  <Link
+                    href="/wishlist"
+                    className="block text-gray-700 hover:text-primary font-medium transition-colors py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Wishlist
+                  </Link>
+                </>
+              )}
             </div>
           </div>
-        </div>
-
-        {/* Mobile Search Bar */}
-        <div className="md:hidden pb-3">
-          <form onSubmit={handleSearch} className="w-full">
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900 placeholder-gray-500 bg-white shadow-sm"
-              />
-              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
-            </div>
-          </form>
-        </div>
+        )}
       </div>
-
-      {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white">
-          <div className="px-2 pt-2 pb-3 space-y-1">
-            <Link
-              href="/products"
-              className="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Products
-            </Link>
-            <Link
-              href="/categories"
-              className="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Categories
-            </Link>
-            <Link
-              href="/deals"
-              className="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Features
-            </Link>
-            {user && (
-              <>
-                <Link
-                  href="/wishlist"
-                  className="flex items-center justify-between px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <span>Wishlist</span>
-                  {wishlistItemCount > 0 && (
-                    <span className="bg-pink-500 text-white text-xs rounded-full px-2 py-1">
-                      {wishlistItemCount}
-                    </span>
-                  )}
-                </Link>
-                <Link
-                  href="/cart"
-                  className="flex items-center justify-between px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <span>Cart</span>
-                  {cartItemCount > 0 && (
-                    <span className="bg-primary text-white text-xs rounded-full px-2 py-1">
-                      {cartItemCount}
-                    </span>
-                  )}
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </nav>
   );
 } 
