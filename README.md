@@ -1,182 +1,179 @@
-# E-commerce Website
+# 🛒 **ShopHub** - Modern E-commerce Platform
 
-A modern e-commerce website built with Next.js, TypeScript, Tailwind CSS, and MongoDB Atlas.
+A full-stack e-commerce platform built with Next.js 15, featuring an AI-powered shopping assistant, complete user management, and a modern, responsive interface.
 
-## Features
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
 
-- Modern, responsive UI with Tailwind CSS
-- Product catalog with search, filtering, and pagination
-- Shopping cart functionality
-- Product detail pages
-- Toast notifications
-- MongoDB Atlas integration for data persistence
+## 🌟 **Features**
 
-## Getting Started
+### 🔐 **Authentication & User Management**
+- **Secure Authentication**: JWT-based auth with HTTP-only cookies
+- **User Registration & Login**: Complete signup/login flow with validation
+- **Profile Management**: Update personal information and change passwords
+- **Session Management**: Persistent login sessions with automatic refresh
 
-### Prerequisites
+### 🛍️ **Shopping Experience**
+- **Product Catalog**: 60 products across 7 categories (Electronics, Laptops, Smartphones, Audio, Wearables, Tablets, Cameras, Accessories)
+- **Advanced Search & Filtering**: Search by name, filter by category, sort by price/popularity
+- **Product Details**: Comprehensive product pages with specifications, reviews, and related products
+- **Shopping Cart**: Add/remove items, quantity management, persistent cart (requires login)
+- **Wishlist**: Save items for later purchase (requires login)
+- **Price Range**: Products from $29 to $2199 covering all budgets
 
+### 🤖 **AI-Powered Shopping Assistant**
+- **LangChain Integration**: Advanced AI chatbot powered by OpenAI GPT-3.5-turbo
+- **Smart Product Recommendations**: Natural language product discovery
+- **Cart Management**: Add products to cart directly through chat
+- **Order Tracking**: Real-time order status updates via chat
+- **24/7 Availability**: Instant customer support and product assistance
+
+### 💳 **Checkout & Payments**
+- **Secure Checkout**: Complete checkout flow with address and payment validation
+- **Payment Methods**: Save and manage multiple payment methods
+- **Order Processing**: Real-time order creation and confirmation
+- **Tax & Shipping**: Automatic calculation with transparent pricing
+
+### 📦 **Order Management**
+- **Order History**: Complete order tracking and history
+- **Real-time Status**: Track orders from pending to delivered
+- **Order Cancellation**: Cancel orders before shipping
+- **Detailed Receipts**: Comprehensive order summaries with itemization
+
+### 🎨 **Modern User Interface**
+- **Responsive Design**: Optimized for desktop, tablet, and mobile
+- **Modern UI/UX**: Clean, intuitive interface with smooth animations
+- **Toast Notifications**: Real-time feedback for user actions
+- **Loading States**: Elegant loading animations and error handling
+
+## 🛠️ **Tech Stack**
+
+### **Frontend**
+- **Next.js 15** - React framework with App Router
+- **React 19** - UI library with latest features
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first styling
+- **Heroicons** - Beautiful SVG icons
+
+### **Backend**
+- **Next.js API Routes** - Serverless API endpoints
+- **MongoDB Atlas** - Cloud database
+- **JWT Authentication** - Secure token-based auth
+- **bcryptjs** - Password hashing
+
+### **AI & Automation**
+- **LangChain** - AI framework for intelligent conversations
+- **OpenAI GPT-3.5-turbo** - Natural language processing
+- **LangGraph** - Advanced conversation flow management
+
+### **State Management**
+- **React Context API** - Global state management
+- **Custom Hooks** - Reusable state logic
+
+## 🚀 **Getting Started**
+
+### **Prerequisites**
 - Node.js 18+ 
 - MongoDB Atlas account (free tier available)
+- OpenAI API key (for AI chatbot)
 
-### MongoDB Atlas Setup
+### **Environment Setup**
 
-1. **Create MongoDB Atlas Account**:
-   - Go to [MongoDB Atlas](https://www.mongodb.com/atlas)
-   - Sign up for a free account
-   - Create a new cluster (M0 Free tier is sufficient)
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd ecommerce
+   ```
 
-2. **Configure Database Access**:
-   - Go to "Database Access" in the left sidebar
-   - Click "Add New Database User"
-   - Create a username and password (save these!)
-   - Select "Read and write to any database"
-   - Click "Add User"
-
-3. **Configure Network Access**:
-   - Go to "Network Access" in the left sidebar
-   - Click "Add IP Address"
-   - Click "Allow Access from Anywhere" (for development)
-   - Click "Confirm"
-
-4. **Get Connection String**:
-   - Go to "Database" in the left sidebar
-   - Click "Connect"
-   - Choose "Connect your application"
-   - Copy the connection string
-
-### Installation
-
-1. Clone the repository
-2. Install dependencies:
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. Set up environment variables:
+3. **Environment Variables**
+   
    Create a `.env.local` file in the root directory:
    ```env
-   MONGODB_URI=your_mongod_credentials
-   ```
-   
-   Replace:
-   - `your_username` with your MongoDB Atlas username
-   - `your_password` with your MongoDB Atlas password
-   - `your_cluster` with your actual cluster name
-   - `ecommerce` with your desired database name
+   # MongoDB Atlas Connection String
+   MONGODB_URI=mongodb_credentials
 
-4. Seed the database:
+   # JWT Secret for authentication
+   JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+
+   # OpenAI API Key for AI chatbot
+   OPENAI_API_KEY=sk-your-openai-api-key-here
+   ```
+
+### **Database Initialization**
+
+1. **Seed the database with sample products**
    ```bash
    npm run seed
    ```
 
-5. Run the development server:
+### **Run the Application**
+
+1. **Start development server**
    ```bash
    npm run dev
    ```
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser.
+2. **Open your browser**
+   - Navigate to [http://localhost:3000](http://localhost:3000)
+   - Start shopping and test the AI chatbot!
 
-## Database Setup
-
-The application uses MongoDB Atlas for data persistence. The database includes:
-
-- **Products collection**: Stores product information with indexes for efficient querying
-- **Cart collection**: Stores shopping cart data
-
-### Database Schema
-
-#### Products
-```typescript
-{
-  _id: ObjectId,
-  id: string,
-  imageUrl: string,
-  name: string,
-  description: string,
-  price: number,
-  category?: string
-}
 ```
 
-#### Cart Items
-```typescript
-{
-  _id: ObjectId,
-  id: string,
-  productId: string,
-  quantity: number,
-  name: string,
-  price: number,
-  imageUrl: string
-}
+## 🔧 **Available Scripts**
+
+```bash
+# Development
+npm run dev          # Start development server with Turbopack
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+
+# Database
+npm run seed         # Seed database with sample products
 ```
 
-## API Endpoints
 
-- `GET /api/products` - List products with filtering, sorting, and pagination
-- `GET /api/products/[id]` - Get individual product details
-- `GET /api/cart` - Get cart items
-- `POST /api/cart` - Add item to cart
-- `PUT /api/cart` - Update cart item quantity
-- `DELETE /api/cart` - Remove item from cart
+## 🎯 **Key Features Showcase**
 
-## Environment Variables
+### **AI Shopping Assistant**
+- Natural language product search: *"Show me gaming laptops under $1000"*
+- Smart recommendations based on user needs
+- Direct cart integration: *"Add laptop-001 to cart"*
+- Order tracking: *"Check order ORD-12345-67890"*
 
-Create a `.env.local` file with:
 
+## 🔒 **Security Features**
+
+- **JWT Authentication** with HTTP-only cookies
+- **Password Hashing** with bcryptjs
+- **Input Validation** on all endpoints
+- **Protected Routes** for authenticated features
+- **Secure Session Management**
+
+## 🚀 **Deployment**
+
+### **Environment Variables for Production**
 ```env
-# MongoDB Atlas Connection String
-MONGODB_URI=""
-
-# Optional: Database name (if not specified in connection string)
-MONGODB_DB_NAME=ecommerce
+NODE_ENV=production
+MONGODB_URI=your-production-mongodb-uri
+JWT_SECRET=your-super-secure-production-jwt-secret
+OPENAI_API_KEY=your-openai-api-key
 ```
 
-## Project Structure
-
-```
-ecommerce/
-├── app/
-│   ├── api/           # API routes
-│   ├── components/    # React components
-│   ├── context/       # React context providers
-│   ├── lib/           # Database utilities
-│   └── products/      # Product pages
-├── scripts/           # Database seeding scripts
-└── public/            # Static assets
+### **Build for Production**
+```bash
+npm run build
+npm run start
 ```
 
-## Technologies Used
+---
 
-- **Next.js 15** - React framework
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **MongoDB Atlas** - Cloud database
-- **React Context** - State management
-
-## Troubleshooting
-
-### Connection Issues
-- Ensure your IP address is whitelisted in MongoDB Atlas
-- Check that your username and password are correct
-- Verify the cluster name in your connection string
-
-### Database Seeding
-- Run `npm run seed` to populate the database
-- Check the console output for any errors
-- Ensure your `.env.local` file is in the root directory
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Built with ❤️ using Next.js, MongoDB, and OpenAI**
